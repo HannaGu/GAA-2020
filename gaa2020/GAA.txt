@@ -1,0 +1,30 @@
+#строка комментария;
+integer function  Func(integer x, integer y)
+{
+new integer z~
+z= x*(-7+y)%3~
+return z~
+}~
+head
+{
+new integer x~
+new integer y~
+new integer g=1~
+new string m~
+new string n~ 
+new string q~
+m='hello '~
+n='world '~
+until(x+45~)
+{
+x=x+Ox17~
+}~
+print x~
+print Func(5,122)~
+print 'hi'~
+q=joinst(m,n)~
+print q~
+q=n+m~
+print q~
+return 0~
+}~
