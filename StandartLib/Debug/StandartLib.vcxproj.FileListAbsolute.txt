@@ -1,0 +1,4 @@
+C:\Users\Lenovo PC\Desktop\gaa2020\Debug\StandartLib.pdb
+C:\Users\Lenovo PC\Desktop\gaa2020\StandartLib\Debug\StandartLib.pdb
+C:\Users\Lenovo PC\Desktop\CourseWork\gaa2020\Debug\StandartLib.pdb
+C:\Users\Lenovo PC\Desktop\CourseWork\gaa2020\StandartLib\Debug\StandartLib.pdb
