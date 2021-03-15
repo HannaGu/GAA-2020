@@ -1,0 +1,257 @@
+Microsoft (R) Macro Assembler Version 14.27.29111.0	    12/16/20 15:13:22
+ASM.asm							     Page 1 - 1
+
+
+				.586
+				.model flat, stdcall
+				includelib StandartLib.lib
+				includelib kernel32.lib
+				includelib libucrt.lib
+
+				ExitProcess PROTO : DWORD
+				copystr PROTO : DWORD, : DWORD
+				joinst PROTO : DWORD, : DWORD
+				outstr PROTO : DWORD
+				outint PROTO : SDWORD 
+				.stack 4096
+ 00000000			.const
+ 00000000 45 52 52 4F 52		overflow db 'ERROR: VARIABLE OVERFLOW', 0 
+	   3A 20 56 41 52
+	   49 41 42 4C 45
+	   20 4F 56 45 52
+	   46 4C 4F 57 00
+ 00000019 45 52 52 4F 52		null_division db 'ERROR: DIVISION BY ZERO', 0
+	   3A 20 44 49 56
+	   49 53 49 4F 4E
+	   20 42 59 20 5A
+	   45 52 4F 00
+ 00000031 FFFFFFF9			L1 SDWORD -7
+ 00000035 00000003			L2 SDWORD 3
+ 00000039 00000001			L3 SDWORD 1
+ 0000003D 68 65 6C 6C 6F		L4 BYTE "hello ", 0
+	   20 00
+ 00000044 77 6F 72 6C 64		L5 BYTE "world ", 0
+	   20 00
+ 0000004B 0000002D			L6 SDWORD 45
+ 0000004F 0000000F			L7 SDWORD 15
+ 00000053 00000005			L8 SDWORD 5
+ 00000057 0000007A			L9 SDWORD 122
+ 0000005B 68 69 00			L10 BYTE "hi", 0
+ 00000000			.data
+ 00000000 00000000			Funcz SDWORD 0
+ 00000004 00000000			headx SDWORD 0
+ 00000008 00000000			heady SDWORD 0
+ 0000000C 00000000			headg SDWORD 0
+ 00000010  000000FF [			headm BYTE 255 DUP(0)
+	    00
+	   ]
+ 0000010F  000000FF [			headn BYTE 255 DUP(0)
+	    00
+	   ]
+ 0000020E  000000FF [			headq BYTE 255 DUP(0)
+	    00
+	   ]
+ 00000000			.code
+
+ 00000000			Func_proc PROC, Funcx : SDWORD, Funcy : SDWORD
+ 00000003  FF 75 08			push Funcx
+ 00000006  FF 35 00000031 R		push L1
+ 0000000C  FF 75 0C			push Funcy
+ 0000000F  58				pop eax
+ 00000010  5B				pop ebx
+ 00000011  03 C3			add eax, ebx
+ 00000013  70 38			jo EXIT_OVERFLOW
+ 00000015  50				push eax
+ 00000016  58				pop eax
+ 00000017  5B				pop ebx
+ 00000018  0F AF C3			imul eax, ebx
+ 0000001B  70 30			jo EXIT_OVERFLOW
+ 0000001D  50				push eax
+ 0000001E  FF 35 00000035 R		push L2
+ 00000024  5B				pop ebx
+ 00000025  58				pop eax
+ 00000026  85 DB			test ebx,ebx
+ 00000028  74 12			jz EXIT_DIV_ON_NULL
+ 0000002A  99				cdq
+ 0000002B  F7 FB			idiv ebx
+ 0000002D  52				push edx
+ 0000002E  8F 05 00000000 R		pop Funcz
+ 00000034  FF 35 00000000 R		push Funcz
+
+ 0000003A  EB 22			jmp EXIT
+ 0000003C				EXIT_DIV_ON_NULL:
+ 0000003C  68 00000019 R		push offset null_division
+ 00000041  E8 00000000 E		call outstr
+ 00000046  6A FF			push - 1
+ 00000048  E8 00000000 E		call ExitProcess
+
+ 0000004D				EXIT_OVERFLOW:
+ 0000004D  68 00000000 R		push offset overflow
+ 00000052  E8 00000000 E		call outstr
+ 00000057  6A FE			push - 2
+ 00000059  E8 00000000 E		call ExitProcess
+
+ 0000005E				EXIT:
+ 0000005E  58				pop eax
+ 00000060  C2 0008			ret 8
+
+ 00000063  6A 00			push 0
+ 00000065  E8 00000000 E		call ExitProcess
+
+ 0000006A			Func_proc ENDP
+
+ 0000006A			main PROC
+ 0000006A  FF 35 00000039 R		push L3
+ 00000070  8F 05 0000000C R		pop headg
+ 00000076  68 0000003D R		push offset L4
+ 0000007B  68 00000010 R		push offset headm
+ 00000080  E8 00000000 E		call copystr
+
+ 00000085  68 00000044 R		push offset L5
+ 0000008A  68 0000010F R		push offset headn
+ 0000008F  E8 00000000 E		call copystr
+
+ 00000094				CYCLE: 
+ 00000094  FF 35 00000004 R		push headx
+ 0000009A  FF 35 0000004F R		push L7
+ 000000A0  58				pop eax
+ 000000A1  5B				pop ebx
+ 000000A2  03 C3			add eax, ebx
+ 000000A4  0F 80 0000009A		jo EXIT_OVERFLOW
+ 000000AA  50				push eax
+ 000000AB  8F 05 00000004 R		pop headx
+ 000000B1  3B 05 0000004B R		cmp eax,L6 
+ 000000B7  74 02			je NEXT
+ 000000B9  E2 D9			loop CYCLE
+ 000000BB				NEXT:
+ 000000BB  FF 35 00000004 R		push headx
+ 000000C1  E8 00000000 E		call outint
+
+ 000000C6  FF 35 00000057 R		push L9
+ 000000CC  FF 35 00000053 R		push L8
+ 000000D2  E8 FFFFFF29			call Func_proc
+ 000000D7  50				push eax
+ 000000D8  E8 00000000 E		call outint
+
+ 000000DD  68 0000005B R		push offset L10
+ 000000E2  E8 00000000 E		call outstr
+
+ 000000E7  68 00000010 R		push offset headm
+ 000000EC  68 0000010F R		push offset headn
+ 000000F1  E8 00000000 E		call joinst
+ 000000F6  50				push eax
+ 000000F7  68 0000020E R		push offset headq
+ 000000FC  E8 00000000 E		call copystr
+
+ 00000101  68 0000020E R		push offset headq
+ 00000106  E8 00000000 E		call outstr
+
+ 0000010B  68 0000010F R		push offset headn
+ 00000110  68 00000010 R		push offset headm
+ 00000115  E8 00000000 E		call joinst
+ 0000011A  70 28			jo EXIT_OVERFLOW
+ 0000011C  50				push eax
+ 0000011D  68 0000020E R		push offset headq
+ 00000122  E8 00000000 E		call copystr
+
+ 00000127  68 0000020E R		push offset headq
+ 0000012C  E8 00000000 E		call outstr
+
+
+ 00000131  EB 22			jmp EXIT
+ 00000133				EXIT_DIV_ON_NULL:
+ 00000133  68 00000019 R		push offset null_division
+ 00000138  E8 00000000 E		call outstr
+ 0000013D  6A FF			push - 1
+ 0000013F  E8 00000000 E		call ExitProcess
+
+ 00000144				EXIT_OVERFLOW:
+ 00000144  68 00000000 R		push offset overflow
+ 00000149  E8 00000000 E		call outstr
+ 0000014E  6A FE			push - 2
+ 00000150  E8 00000000 E		call ExitProcess
+
+ 00000155				EXIT:
+ 00000155  58				pop eax
+ 00000156  C3				ret 0
+
+ 00000157  6A 00			push 0
+ 00000159  E8 00000000 E		call ExitProcess
+
+ 0000015E			main ENDP
+				end main
+Microsoft (R) Macro Assembler Version 14.27.29111.0	    12/16/20 15:13:22
+ASM.asm							     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+CONST  . . . . . . . . . . . . .	32 Bit	 0000005E Para	  Public  'CONST'	 ReadOnly
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000030D Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000015E Para	  Public  'CODE'	
+
+
+Procedures, parameters, and locals:
+
+                N a m e                 Type     Value    Attr
+
+ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+Func_proc  . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000006A Public STDCALL
+  Funcx  . . . . . . . . . . . .	DWord	 bp + 00000008
+  Funcy  . . . . . . . . . . . .	DWord	 bp + 0000000C
+  EXIT_DIV_ON_NULL . . . . . . .	L Near	 0000003C _TEXT	
+  EXIT_OVERFLOW  . . . . . . . .	L Near	 0000004D _TEXT	
+  EXIT . . . . . . . . . . . . .	L Near	 0000005E _TEXT	
+copystr  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+joinst . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+main . . . . . . . . . . . . . .	P Near	 0000006A _TEXT	Length= 000000F4 Public STDCALL
+  CYCLE  . . . . . . . . . . . .	L Near	 00000094 _TEXT	
+  NEXT . . . . . . . . . . . . .	L Near	 000000BB _TEXT	
+  EXIT_DIV_ON_NULL . . . . . . .	L Near	 00000133 _TEXT	
+  EXIT_OVERFLOW  . . . . . . . .	L Near	 00000144 _TEXT	
+  EXIT . . . . . . . . . . . . .	L Near	 00000155 _TEXT	
+outint . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+outstr . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000003h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+Funcz  . . . . . . . . . . . . .	DWord	 00000000 _DATA	
+L10  . . . . . . . . . . . . . .	Byte	 0000005B CONST	
+L1 . . . . . . . . . . . . . . .	DWord	 00000031 CONST	
+L2 . . . . . . . . . . . . . . .	DWord	 00000035 CONST	
+L3 . . . . . . . . . . . . . . .	DWord	 00000039 CONST	
+L4 . . . . . . . . . . . . . . .	Byte	 0000003D CONST	
+L5 . . . . . . . . . . . . . . .	Byte	 00000044 CONST	
+L6 . . . . . . . . . . . . . . .	DWord	 0000004B CONST	
+L7 . . . . . . . . . . . . . . .	DWord	 0000004F CONST	
+L8 . . . . . . . . . . . . . . .	DWord	 00000053 CONST	
+L9 . . . . . . . . . . . . . . .	DWord	 00000057 CONST	
+headg  . . . . . . . . . . . . .	DWord	 0000000C _DATA	
+headm  . . . . . . . . . . . . .	Byte	 00000010 _DATA	
+headn  . . . . . . . . . . . . .	Byte	 0000010F _DATA	
+headq  . . . . . . . . . . . . .	Byte	 0000020E _DATA	
+headx  . . . . . . . . . . . . .	DWord	 00000004 _DATA	
+heady  . . . . . . . . . . . . .	DWord	 00000008 _DATA	
+null_division  . . . . . . . . .	Byte	 00000019 CONST	
+overflow . . . . . . . . . . . .	Byte	 00000000 CONST	
+
+	   0 Warnings
+	   0 Errors
